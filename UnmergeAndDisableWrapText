@@ -1,0 +1,21 @@
+Sub UnmergeAndDisableWrapText()
+    Dim ws As Worksheet
+    Dim cell As Range
+    Dim mergedArea As Range
+
+    Application.ScreenUpdating = False
+
+    For Each ws In ThisWorkbook.Worksheets
+        ' Loop through all merged cells only
+        For Each cell In ws.UsedRange
+            If cell.MergeCells Then
+                Set mergedArea = cell.MergeArea
+                mergedArea.UnMerge
+                mergedArea.WrapText = False
+            End If
+        Next cell
+    Next ws
+
+    Application.ScreenUpdating = True
+    MsgBox "All merged cells unmerged and wrap text disabled.", vbInformation
+End Sub
