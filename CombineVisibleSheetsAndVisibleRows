@@ -1,0 +1,52 @@
+Sub CombineVisibleSheetsAndVisibleRows()
+    Dim ws As Worksheet
+    Dim masterSheet As Worksheet
+    Dim lastRow As Long, lastCol As Long
+    Dim pasteRow As Long
+    Dim rng As Range, cell As Range
+
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+
+    ' Create or clear the Master sheet
+    On Error Resume Next
+    Set masterSheet = ThisWorkbook.Sheets("Master")
+    If masterSheet Is Nothing Then
+        Set masterSheet = ThisWorkbook.Sheets.Add(Before:=ThisWorkbook.Sheets(1))
+        masterSheet.Name = "Master"
+    Else
+        masterSheet.Cells.Clear
+    End If
+    On Error GoTo 0
+
+    pasteRow = 1
+
+    ' Loop through all visible sheets except Master
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Visible = xlSheetVisible And ws.Name <> "Master" Then
+            With ws
+                lastRow = .Cells(.Rows.Count, 1).End(xlUp).Row
+                lastCol = .Cells(1, .Columns.Count).End(xlToLeft).Column
+
+                Set rng = .Range(.Cells(1, 1), .Cells(lastRow, lastCol))
+
+                ' Copy header only once
+                If pasteRow = 1 Then
+                    rng.Rows(1).Copy Destination:=masterSheet.Range("A" & pasteRow)
+                    pasteRow = pasteRow + 1
+                End If
+
+                ' Copy visible rows (excluding header)
+                For Each cell In rng.Columns(1).Cells
+                    If cell.Row > 1 And cell.EntireRow.Hidden = False Then
+                        cell.EntireRow.Copy Destination:=masterSheet.Range("A" & pasteRow)
+                        pasteRow = pasteRow + 1
+                    End If
+                Next cell
+            End With
+        End If
+    Next ws
+
+    Application.ScreenUpdating = True
+    MsgBox "Visible sheets and visible rows copied to 'Master'.", vbInformation
+End Sub
