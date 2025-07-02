@@ -1,0 +1,59 @@
+Sub ExpandUsingSizeArray()
+    Dim wsSrc As Worksheet, wsDest As Worksheet
+    Dim srcRow As Long, destRow As Long
+    Dim lastRow As Long
+    Dim sizeRange As String
+    Dim sizeParts() As String
+    Dim startVal As Double, endVal As Double
+    Dim sizeArray
+    Dim i As Long, col As Long
+
+    ' === Define your size array list ===
+    sizeArray = Array(0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24, 30, 48)
+
+    ' === Set worksheets ===
+    Set wsSrc = Sheets("Sheet1")
+    On Error Resume Next
+    Set wsDest = Sheets("Expanded")
+    If wsDest Is Nothing Then
+        Set wsDest = Sheets.Add(After:=wsSrc)
+        wsDest.Name = "Expanded"
+    Else
+        wsDest.Cells.Clear
+    End If
+    On Error GoTo 0
+
+    ' === Copy headers ===
+    wsSrc.Rows(1).Copy Destination:=wsDest.Rows(1)
+    wsDest.Cells(1, 1).Value = "Size"
+    destRow = 2
+
+    ' === Loop source data ===
+    lastRow = wsSrc.Cells(wsSrc.Rows.Count, "A").End(xlUp).Row
+    For srcRow = 2 To lastRow
+        sizeRange = Trim(wsSrc.Cells(srcRow, 1).Value)
+        If InStr(sizeRange, "-") > 0 Then
+            sizeParts = Split(Replace(sizeRange, " ", ""), "-")
+            If UBound(sizeParts) = 1 Then
+                startVal = Val(sizeParts(0))
+                endVal = Val(sizeParts(1))
+
+                ' === Loop through size array ===
+                For i = LBound(sizeArray) To UBound(sizeArray)
+                    If sizeArray(i) >= startVal And sizeArray(i) <= endVal Then
+                        wsDest.Cells(destRow, 1).Value = sizeArray(i)
+
+                        ' Copy related columns (B onward)
+                        For col = 2 To wsSrc.UsedRange.Columns.Count
+                            wsDest.Cells(destRow, col).Value = wsSrc.Cells(srcRow, col).Value
+                        Next col
+
+                        destRow = destRow + 1
+                    End If
+                Next i
+            End If
+        End If
+    Next srcRow
+
+    MsgBox "Finished expanding using size array list.", vbInformation
+End Sub
