@@ -1,0 +1,9 @@
+Sub DeleteAllImagesInActiveSheet()
+    Dim shp As Shape
+    For Each shp In ActiveSheet.Shapes
+        If shp.Type = msoPicture Then
+            shp.Delete
+        End If
+    Next shp
+    MsgBox "All images deleted from active sheet.", vbInformation
+End Sub
