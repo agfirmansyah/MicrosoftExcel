@@ -1,0 +1,58 @@
+Sub MultiplyBranchHeaderWithIDs()
+    Dim ws As Worksheet
+    Dim wsOut As Worksheet
+    Dim lastRow As Long, lastCol As Long
+    Dim i As Long, j As Long
+    Dim outRow As Long
+    Dim branchSize As Variant, headerSize As Variant
+    Dim cellVal As Variant
+    Dim idList As Variant
+    Dim id As Variant
+
+    ' Input ID array here
+    idList = Array("A", "B", "C") ' You can change this array as needed
+
+    ' Source worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change if needed
+
+    ' Output worksheet
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    Worksheets("BranchHeaderOutput").Delete
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+
+    Set wsOut = ThisWorkbook.Sheets.Add
+    wsOut.Name = "BranchHeaderOutput"
+
+    ' Set text format
+    wsOut.Range("A:D").NumberFormat = "@"
+
+    ' Write headers
+    wsOut.Range("A1:D1").Value = Array("ID", "Branch Size", "Header Size", "Type")
+    outRow = 2
+
+    ' Find matrix bounds
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    lastCol = ws.Cells(lastRow, ws.Columns.Count).End(xlToLeft).Column
+
+    ' Read and multiply data
+    For Each id In idList
+        For i = 2 To lastRow - 1 ' Data rows
+            branchSize = ws.Cells(i, 1).Text
+            For j = 2 To lastCol
+                headerSize = ws.Cells(lastRow, j).Text
+                cellVal = ws.Cells(i, j).Text
+                If cellVal <> "" Then
+                    wsOut.Cells(outRow, 1).Value = id
+                    wsOut.Cells(outRow, 2).Value = branchSize
+                    wsOut.Cells(outRow, 3).Value = headerSize
+                    wsOut.Cells(outRow, 4).Value = cellVal
+                    outRow = outRow + 1
+                End If
+            Next j
+        Next i
+    Next id
+
+    MsgBox "Data extraction with IDs complete in 'BranchHeaderOutput'.", vbInformation
+End Sub
