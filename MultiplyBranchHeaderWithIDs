@@ -10,10 +10,10 @@ Sub MultiplyBranchHeaderWithIDs()
     Dim id As Variant
 
     ' Input ID array here
-    idList = Array("A", "B", "C") ' You can change this array as needed
+    idList = Array("B1A1", "B1A1B", "B1A1H", "B1A2", "B1A2H", "B1A4N", "B2A1", "B2A1B", "B2A1M", "B2A2", "B2A2H", "B4A1", "B4A1B", "B4A1H", "B4A1M", "B4A2H", "B4A4", "B4A4H", "B5C1", "B6C1", "E2A1", "E2A1B", "E4A1", "E4A1B", "E4A2B", "E5C1") ' You can change this array as needed
 
     ' Source worksheet
-    Set ws = ThisWorkbook.Sheets("Sheet1") ' Change if needed
+    Set ws = ThisWorkbook.Sheets("1A") ' Change if needed
 
     ' Output worksheet
     On Error Resume Next
