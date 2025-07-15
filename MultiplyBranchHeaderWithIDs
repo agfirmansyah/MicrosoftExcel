@@ -8,22 +8,24 @@ Sub MultiplyBranchHeaderWithIDs()
     Dim cellVal As Variant
     Dim idList As Variant
     Dim id As Variant
+    Dim outputName As String
 
     ' Input ID array here
-    idList = Array("B1A1", "B1A1B", "B1A1H", "B1A2", "B1A2H", "B1A4N", "B2A1", "B2A1B", "B2A1M", "B2A2", "B2A2H", "B4A1", "B4A1B", "B4A1H", "B4A1M", "B4A2H", "B4A4", "B4A4H", "B5C1", "B6C1", "E2A1", "E2A1B", "E4A1", "E4A1B", "E4A2B", "E5C1") ' You can change this array as needed
+    idList = Array("R4A0N") ' You can change this array as needed
 
     ' Source worksheet
-    Set ws = ThisWorkbook.Sheets("1A") ' Change if needed
-
+    Set ws = ThisWorkbook.Sheets("Output6") ' Change if needed
+    outputName = "Sum6"
+    
     ' Output worksheet
     On Error Resume Next
     Application.DisplayAlerts = False
-    Worksheets("BranchHeaderOutput").Delete
+    Worksheets(outputName).Delete
     Application.DisplayAlerts = True
     On Error GoTo 0
 
     Set wsOut = ThisWorkbook.Sheets.Add
-    wsOut.Name = "BranchHeaderOutput"
+    wsOut.Name = outputName
 
     ' Set text format
     wsOut.Range("A:D").NumberFormat = "@"
@@ -38,19 +40,21 @@ Sub MultiplyBranchHeaderWithIDs()
 
     ' Read and multiply data
     For Each id In idList
-        For i = 2 To lastRow - 1 ' Data rows
-            branchSize = ws.Cells(i, 1).Text
+        For i = 2 To lastRow ' Data rows
+            ' branchSize = ws.Cells(i, 2).Text
             For j = 2 To lastCol
-                headerSize = ws.Cells(lastRow, j).Text
+                headerSize = ws.Cells(i, 1).Text
                 cellVal = ws.Cells(i, j).Text
                 If cellVal <> "" Then
                     wsOut.Cells(outRow, 1).Value = id
-                    wsOut.Cells(outRow, 2).Value = branchSize
-                    wsOut.Cells(outRow, 3).Value = headerSize
-                    wsOut.Cells(outRow, 4).Value = cellVal
-                    outRow = outRow + 1
+                    wsOut.Cells(outRow, 2).Value = headerSize
+                    wsOut.Cells(outRow, j + 1).Value = cellVal
+                    ' wsOut.Cells(outRow, 3).Value = cellVal
+                    ' wsOut.Cells(outRow, 4).Value = cellVal
+                    
                 End If
             Next j
+            outRow = outRow + 1
         Next i
     Next id
 
