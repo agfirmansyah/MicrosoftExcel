@@ -1,0 +1,52 @@
+Sub ExpandOlet_ByColumnARange()
+    Dim wsInput As Worksheet, wsBranchList As Worksheet, wsOutput As Worksheet
+    Dim lastRowInput As Long, lastRowBranch As Long, outRow As Long
+    Dim i As Long, j As Long
+    Dim headerVal As Double, branchVal As Double
+    Dim branchRange As String, minBranch As Double, maxBranch As Double
+    
+    Set wsInput = ThisWorkbook.Sheets("OletList")
+    Set wsBranchList = ThisWorkbook.Sheets("BranchList")
+    
+    ' Buat / Reset Sheet Output
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    Worksheets("Output").Delete
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+    Set wsOutput = Worksheets.Add
+    wsOutput.Name = "Output"
+    
+    ' Salin header dari Input
+    wsInput.Rows(1).Copy Destination:=wsOutput.Rows(1)
+    outRow = 2
+    
+    lastRowInput = wsInput.Cells(wsInput.Rows.Count, 1).End(xlUp).Row
+    lastRowBranch = wsBranchList.Cells(wsBranchList.Rows.Count, 1).End(xlUp).Row
+    
+    For i = 2 To lastRowInput
+        branchRange = Trim(wsInput.Cells(i, 1).Value)
+        
+        ' Cek format "min-max"
+        If InStr(branchRange, "-") > 0 Then
+            minBranch = Val(Split(branchRange, "-")(0))
+            maxBranch = Val(Split(branchRange, "-")(1))
+            
+            For j = 2 To lastRowBranch
+                headerVal = wsBranchList.Cells(j, 1).Value
+                branchVal = wsBranchList.Cells(j, 2).Value
+                
+                If branchVal >= minBranch And branchVal <= maxBranch Then
+                    ' Salin baris dan ubah header & branch
+                    wsInput.Rows(i).Copy Destination:=wsOutput.Rows(outRow)
+                    wsOutput.Cells(outRow, 5).Value = headerVal
+                    wsOutput.Cells(outRow, 6).Value = branchVal
+                    outRow = outRow + 1
+                End If
+            Next j
+        End If
+    Next i
+    
+    MsgBox "Selesai. Total baris disalin: " & (outRow - 2), vbInformation
+End Sub
+
