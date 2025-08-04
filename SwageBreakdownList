@@ -1,0 +1,67 @@
+Sub MatchReducerInputWithSpecifiedList()
+    Dim wsInput As Worksheet, wsSpec As Worksheet, wsOut As Worksheet
+    Dim lastInputRow As Long, lastSpecRow As Long
+    Dim inputRow As Long, specRow As Long, outRow As Long
+    Dim inputMin As Double, inputMax As Double
+    Dim specMin As Double, specMax As Double
+    Dim splitVals() As String
+    Dim inputText As String
+    Dim tVal(1 To 20) As String
+    Dim i As Long
+
+    Set wsInput = ThisWorkbook.Sheets("Swage")         ' Input sheet
+    Set wsSpec = ThisWorkbook.Sheets("SpecifiedList")   ' Valid Min/Max combinations
+
+    ' Create/replace output sheet
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    Worksheets("ReducerOutput").Delete
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+    Set wsOut = ThisWorkbook.Sheets.Add
+    wsOut.Name = "ReducerOutput"
+    outRow = 1
+
+    ' Get row counts
+    lastInputRow = wsInput.Cells(wsInput.Rows.Count, 1).End(xlUp).Row
+    lastSpecRow = wsSpec.Cells(wsSpec.Rows.Count, 1).End(xlUp).Row
+
+    ' Loop through input rows
+    For inputRow = 2 To lastInputRow
+        inputText = Trim(wsInput.Cells(inputRow, 1).Value)
+
+        If InStr(inputText, "-") > 0 Then
+            splitVals = Split(inputText, "-")
+            If UBound(splitVals) = 1 Then
+                inputMin = Val(Trim(splitVals(0)))
+                inputMax = Val(Trim(splitVals(1)))
+
+                ' Loop through SpecifiedList to find matching Max/Min rows
+                For specRow = 2 To lastSpecRow
+                    specMax = wsSpec.Cells(specRow, 1).Value
+                    specMin = wsSpec.Cells(specRow, 2).Value
+
+                    If specMax <= inputMax And specMin >= inputMin Then
+                        ' Read T1–T4 from input row
+                        For i = 1 To 20
+                            tVal(i) = wsInput.Cells(inputRow, i + 1).Value
+                        Next i
+
+                        ' Write to output: Max, Min, T1-T4
+                        wsOut.Cells(outRow, 1).Value = specMax
+                        wsOut.Cells(outRow, 2).Value = specMin
+                        For i = 1 To 20
+                            wsOut.Cells(outRow, i + 2).Value = tVal(i)
+                        Next i
+
+                        outRow = outRow + 1
+                    End If
+                Next specRow
+            End If
+        End If
+    Next inputRow
+
+    MsgBox "Matching combinations copied to 'ReducerOutput'.", vbInformation
+End Sub
+
+
