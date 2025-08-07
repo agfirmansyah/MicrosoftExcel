@@ -1,0 +1,49 @@
+SAMPLE
+
+401-LP-7114	401-LP-7114-B1A2-4-IH		401-LP-7114	401-LP-7114-B1A2-4-IH
+401-MP-7101	401-MP-7101-B1A1-2-IH		401-MP-7101	401-MP-7101-B1A1-2-IH, 401-MP-7101-B2A1-2-IH
+            401-MP-7101-B2A1-2-IH		
+
+
+Sub CombineGroupedLines()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim currentKey As String
+    Dim combinedText As String
+    Dim outputRow As Long
+
+    Set ws = ActiveSheet
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    outputRow = 1
+
+    For i = 1 To lastRow
+        If Trim(ws.Cells(i, 1).Value) <> "" Then
+            ' If new key found
+            If currentKey <> "" Then
+                ' Output previous group
+                ws.Cells(outputRow, 4).Value = currentKey
+                ws.Cells(outputRow, 5).Value = combinedText
+                outputRow = outputRow + 1
+            End If
+
+            currentKey = ws.Cells(i, 1).Value
+            combinedText = ws.Cells(i, 2).Value
+        Else
+            ' Append to current group
+            If combinedText <> "" Then
+                combinedText = combinedText & ", " & ws.Cells(i, 2).Value
+            Else
+                combinedText = ws.Cells(i, 2).Value
+            End If
+        End If
+    Next i
+
+    ' Output last group
+    If currentKey <> "" Then
+        ws.Cells(outputRow, 4).Value = currentKey
+        ws.Cells(outputRow, 5).Value = combinedText
+    End If
+
+    MsgBox "Combined output written to columns D and E.", vbInformation
+End Sub
