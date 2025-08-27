@@ -1,0 +1,28 @@
+Sub DeleteSheetsByPartialName()
+    Dim ws As Worksheet
+    Dim keyword As String
+    Dim answer As VbMsgBoxResult
+
+    ' Set keyword to match in sheet name
+    keyword = "temp" ' <-- Change this to your target text
+
+    ' Confirm deletion
+    answer = MsgBox("This will delete all sheets containing '" & keyword & "' in the name. Continue?", _
+                    vbYesNo + vbExclamation, "Confirm Delete")
+    If answer <> vbYes Then Exit Sub
+
+    Application.DisplayAlerts = False
+
+    ' Loop in reverse to safely delete
+    Dim i As Long
+    For i = ThisWorkbook.Worksheets.Count To 1 Step -1
+        Set ws = ThisWorkbook.Worksheets(i)
+        If InStr(1, ws.Name, keyword, vbTextCompare) > 0 Then
+            ws.Delete
+        End If
+    Next i
+
+    Application.DisplayAlerts = True
+
+    MsgBox "All matching worksheets have been deleted.", vbInformation
+End Sub
