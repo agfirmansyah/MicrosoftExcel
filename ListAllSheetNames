@@ -1,0 +1,27 @@
+Sub ListAllSheetNames()
+    Dim ws As Worksheet
+    Dim outputWs As Worksheet
+    Dim i As Long
+
+    ' Create or reuse a sheet for output
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    Worksheets("SheetList").Delete
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+
+    Set outputWs = ThisWorkbook.Sheets.Add
+    outputWs.Name = "SheetList"
+
+    ' Header
+    outputWs.Cells(1, 1).Value = "Sheet Name"
+    i = 2
+
+    ' Loop through all worksheets
+    For Each ws In ThisWorkbook.Worksheets
+        outputWs.Cells(i, 1).Value = ws.Name
+        i = i + 1
+    Next ws
+
+    MsgBox "All sheet names have been listed in 'SheetList'.", vbInformation
+End Sub
