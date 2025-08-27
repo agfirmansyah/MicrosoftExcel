@@ -1,0 +1,20 @@
+Sub DeleteAllHiddenSheets()
+    Dim ws As Worksheet
+    Dim answer As VbMsgBoxResult
+
+    ' Confirm before deleting
+    answer = MsgBox("This will permanently delete all hidden sheets. Continue?", vbYesNo + vbExclamation, "Confirm Delete")
+    If answer <> vbYes Then Exit Sub
+
+    Application.DisplayAlerts = False ' Suppress confirmation prompts
+
+    For Each ws In ThisWorkbook.Worksheets
+        If ws.Visible <> xlSheetVisible Then
+            ws.Delete
+        End If
+    Next ws
+
+    Application.DisplayAlerts = True
+
+    MsgBox "All hidden worksheets have been deleted.", vbInformation
+End Sub
