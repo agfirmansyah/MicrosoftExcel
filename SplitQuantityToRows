@@ -1,0 +1,44 @@
+Sub SplitQuantityToRows()
+    Dim ws As Worksheet, wsOut As Worksheet
+    Dim lastRow As Long, outRow As Long
+    Dim i As Long, j As Long
+    Dim nm As String, qty As Long
+    
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' Source sheet
+    On Error Resume Next
+    Set wsOut = ThisWorkbook.Sheets("Result")
+    If wsOut Is Nothing Then
+        Set wsOut = ThisWorkbook.Sheets.Add
+        wsOut.Name = "Result"
+    End If
+    On Error GoTo 0
+    
+    wsOut.Cells.Clear
+    
+    ' Headers
+    wsOut.Range("A1").Value = "Name"
+    wsOut.Range("B1").Value = "Sheet"
+    outRow = 2
+    
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    For i = 2 To lastRow
+        nm = ws.Cells(i, 1).Value
+        qty = ws.Cells(i, 2).Value
+        
+        If qty <= 1 Then
+            wsOut.Cells(outRow, 1).Value = nm
+            wsOut.Cells(outRow, 2).Value = ""
+            outRow = outRow + 1
+        Else
+            For j = 1 To qty
+                wsOut.Cells(outRow, 1).Value = nm
+                wsOut.Cells(outRow, 2).Value = "SHT " & j
+                outRow = outRow + 1
+            Next j
+        End If
+    Next i
+    
+    MsgBox "Done! Expanded list is in 'Result' sheet."
+End Sub
+
