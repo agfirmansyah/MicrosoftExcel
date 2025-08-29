@@ -1,0 +1,31 @@
+Sub ExtractSCH_MM()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim i As Long
+    Dim txt As String
+    Dim startPos As Long, endPos As Long
+    
+    Set ws = ThisWorkbook.Sheets("SCHCollect") ' Change if needed
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    For i = 1 To lastRow
+        txt = ws.Cells(i, "A").Value
+        
+        startPos = InStr(1, txt, "SCH ", vbTextCompare)
+        
+        If startPos > 0 Then
+            endPos = InStr(startPos, txt, " MM", vbTextCompare)
+            
+            If endPos > 0 And endPos > startPos Then
+                ' Extract from SCH to MM
+                ws.Cells(i, "B").Value = Mid(txt, startPos, endPos - startPos + 3)
+            Else
+                ' SCH found but MM not found ? extract from SCH to end of string
+                ws.Cells(i, "B").Value = ""
+            End If
+        Else
+            ' SCH not found ? leave blank
+            ws.Cells(i, "B").Value = ""
+        End If
+    Next i
+End Sub
