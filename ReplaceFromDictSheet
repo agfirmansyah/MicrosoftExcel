@@ -1,0 +1,35 @@
+Sub ReplaceFromDictSheet()
+    Dim wsSrc As Worksheet, wsDict As Worksheet
+    Dim rng As Range, c As Range
+    Dim dict As Object, k
+    Dim lastRow As Long, i As Long
+    
+    '--- source and dictionary sheets ---
+    Set wsSrc = ThisWorkbook.Sheets("Sheet1")   ' <== change to your source sheet
+    Set wsDict = ThisWorkbook.Sheets("dict")    ' sheet with dictionary
+    
+    '--- build dictionary ---
+    Set dict = CreateObject("Scripting.Dictionary")
+    lastRow = wsDict.Cells(wsDict.Rows.Count, "A").End(xlUp).Row
+    
+    For i = 1 To lastRow
+        If wsDict.Cells(i, 1).Value <> "" Then
+            dict(wsDict.Cells(i, 1).Value) = wsDict.Cells(i, 2).Value
+        End If
+    Next i
+    
+    '--- apply replacements to all used cells ---
+    Set rng = wsSrc.UsedRange
+    Application.ScreenUpdating = False
+    
+    For Each c In rng
+        If Not IsEmpty(c.Value) Then
+            For Each k In dict.Keys
+                c.Value = Replace(c.Value, k, dict(k))
+            Next k
+        End If
+    Next c
+    
+    Application.ScreenUpdating = True
+    MsgBox "Replace finished using dictionary sheet!"
+End Sub
