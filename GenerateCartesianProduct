@@ -1,0 +1,53 @@
+Column A
+A
+B
+
+Column B
+1
+2
+3
+
+
+Column C
+100
+200
+300
+400
+
+Result
+A	1	100
+A	1	200
+A	1	300
+A	1	400
+A	2	100
+A	2	200
+A	2	300
+A	2	400
+
+
+Sub GenerateCartesianProduct()
+    Dim ws As Worksheet
+    Dim lastA As Long, lastB As Long, lastC As Long
+    Dim i As Long, j As Long, k As Long
+    Dim outputRow As Long
+    
+    Set ws = ThisWorkbook.Sheets(1)
+    
+    ' Find last rows
+    lastA = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    lastB = ws.Cells(ws.Rows.Count, 2).End(xlUp).Row
+    lastC = ws.Cells(ws.Rows.Count, 3).End(xlUp).Row
+    
+    outputRow = 2   ' start writing at row 2 (E2:F2:G2)
+    
+    For i = 2 To lastA
+        For j = 2 To lastB
+            For k = 2 To lastC
+                ws.Cells(outputRow, 5).Value = ws.Cells(i, 1).Value   ' Col E = A
+                ws.Cells(outputRow, 6).Value = ws.Cells(j, 2).Value   ' Col F = B
+                ws.Cells(outputRow, 7).Value = ws.Cells(k, 3).Value   ' Col G = C
+                outputRow = outputRow + 1
+            Next k
+        Next j
+    Next i
+End Sub
