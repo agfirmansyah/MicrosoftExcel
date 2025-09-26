@@ -1,0 +1,11 @@
+Function GetDashWordRegex(ByVal txt As String) As String
+    Dim RE As Object, Match As Object
+    Set RE = CreateObject("VBScript.RegExp")
+    RE.Pattern = "\b[\w]+-[\w-]+\b"
+    RE.Global = True
+    
+    If RE.test(txt) Then
+        Set Match = RE.Execute(txt)(0)
+        GetDashWordRegex = Match.Value
+    End If
+End Function
