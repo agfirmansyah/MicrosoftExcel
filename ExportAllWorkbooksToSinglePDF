@@ -1,0 +1,97 @@
+Sub ExportAllWorkbooksToSinglePDF()
+    'Declare variables
+    Dim fso As Object ' FileSystemObject
+    Dim folder As Object ' Folder object
+    Dim file As Object ' File object
+    Dim workFolder As String
+    Dim wb As Workbook
+    Dim ws As Worksheet
+    Dim saveFileName As String
+    Dim originalScreenUpdating As Boolean
+    Dim sheetsToExport() As String
+    Dim i As Long
+    
+    '--- USER-DEFINED INPUT ---
+    'CHANGE THIS to the path of your folder containing the Excel files
+    workFolder = "C:\Users\agfirmansyah\Downloads\PDFExcel\" ' Make sure to include a trailing backslash
+
+    '--- INITIAL SETUP ---
+    originalScreenUpdating = Application.ScreenUpdating
+    Application.ScreenUpdating = False ' Turn off screen updating for faster execution
+    Application.DisplayAlerts = False ' Prevent alerts from interrupting the process
+    
+    'Create a FileSystemObject
+    On Error GoTo ErrorHandler ' Enable error handling
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    
+    'Check if the folder exists
+    If fso.FolderExists(workFolder) = False Then
+        MsgBox "Error: The specified folder path does not exist.", vbCritical
+        GoTo CleanExit
+    End If
+    
+    Set folder = fso.GetFolder(workFolder)
+    
+    '--- LOOP THROUGH ALL FILES IN THE FOLDER ---
+    For Each file In folder.Files
+        'Process only Excel files (adjust extensions as needed)
+        If InStr(file.Name, ".xlsx") > 0 Or InStr(file.Name, ".xlsm") > 0 Then
+            'Open the workbook
+            Set wb = Workbooks.Open(file.Path, ReadOnly:=True)
+            
+            'Prepare the output file name
+            saveFileName = workFolder & Replace(Replace(file.Name, ".xlsx", ""), ".xlsm", "") & ".pdf"
+            
+            '--- MAKE ALL WORKSHEETS VISIBLE FOR EXPORT ---
+            For Each ws In wb.Worksheets
+                ws.Visible = xlSheetVisible
+            Next ws
+            
+            '--- SELECT ALL WORKSHEETS FOR EXPORT ---
+            ReDim sheetsToExport(1 To wb.Worksheets.Count)
+            For i = 1 To wb.Worksheets.Count
+                sheetsToExport(i) = wb.Worksheets(i).Name
+                With wb.Worksheets(i).PageSetup
+                    originalZoomState = .Zoom = True
+                    .Zoom = False
+                    .FitToPagesWide = 1 ' Fit all columns to a single page
+                    .FitToPagesTall = 1 ' Fit all rows to a single page
+                End With
+            Next i
+            
+            wb.Sheets(sheetsToExport).Select
+            
+            '--- EXPORT TO PDF ---
+            ActiveSheet.ExportAsFixedFormat _
+                Type:=xlTypePDF, _
+                Filename:=saveFileName, _
+                Quality:=xlQualityStandard, _
+                IncludeDocProperties:=True, _
+                IgnorePrintAreas:=False, _
+                OpenAfterPublish:=False
+            
+            '--- CLEAN UP ---
+            wb.Close SaveChanges:=False
+            
+            'Give user feedback on progress (optional)
+            Debug.Print "Exported: " & file.Name & " to " & saveFileName
+        End If
+    Next file
+    
+CleanExit:
+    '--- FINAL CLEANUP ---
+    Application.ScreenUpdating = originalScreenUpdating
+    Application.DisplayAlerts = True
+    
+    'Inform the user
+    MsgBox "All Excel files in the specified folder have been exported to single PDF files.", vbInformation
+    Exit Sub ' Exit the procedure to prevent the error handler from running
+    
+ErrorHandler:
+    'Display error message
+    MsgBox "An error occurred: " & Err.Description, vbCritical
+    GoTo CleanExit
+    
+End Sub
+
+
