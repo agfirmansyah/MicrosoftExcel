@@ -1,0 +1,45 @@
+Sub ExportWorksheetsToPDFs()
+    Dim ws As Worksheet
+    Dim savePath As String
+    
+    ' Define the folder path where you want to save the PDFs.
+    ' Change "C:\YourPDFs\" to your desired folder.
+    savePath = "C:\Users\agfirmansyah\Downloads\"
+    
+    ' Create the folder if it doesn't exist
+    If Dir(savePath, vbDirectory) = "" Then
+        MkDir savePath
+    End If
+
+    For Each ws In ThisWorkbook.Worksheets
+        ' Construct the full filename including the path and worksheet name
+        Dim filename As String
+        filename = savePath & ws.Name & ".pdf"
+        
+        With ws.PageSetup
+            originalZoomState = .Zoom = True
+            .Zoom = False
+            .FitToPagesWide = 1 ' Fit all columns to a single page
+            .FitToPagesTall = 1 ' Fit all rows to a single page
+        End With
+        
+        ' Export the current worksheet as a PDF
+        ws.ExportAsFixedFormat Type:=xlTypePDF, _
+                              filename:=filename, _
+                              Quality:=xlQualityStandard, _
+                              IncludeDocProperties:=True, _
+                              IgnorePrintAreas:=False, _
+                              OpenAfterPublish:=False
+        With ws.PageSetup
+            .Zoom = originalZoomState ' Restore the original zoom state
+            .FitToPagesWide = False
+            .FitToPagesTall = False
+        End With
+        
+    Next ws
+    
+    MsgBox "All worksheets exported to PDFs in " & savePath, vbInformation
+End Sub
+
+
+
