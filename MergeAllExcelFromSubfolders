@@ -1,0 +1,102 @@
+Sub MergeAllFromSubfolders()
+
+    Dim folderPath As String
+    Dim wbTarget As Workbook
+    Dim targetSheet As Worksheet
+    Dim firstFile As Boolean
+    
+    folderPath = "C:\PROJECT\16. MASMINDO\Check MTO\From PDF Isometric\Excel\"   ' <<< CHANGE PATH
+    
+    Set wbTarget = ThisWorkbook
+    Set targetSheet = wbTarget.Sheets(1)
+    firstFile = True
+    
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+
+    'Call recursive scan
+    ScanFolder folderPath, targetSheet, firstFile
+
+    Application.ScreenUpdating = True
+
+    MsgBox "Merge Completed!"
+End Sub
+
+
+'-------------------------------------------------------
+' Recursive Folder Scanner
+'-------------------------------------------------------
+Sub ScanFolder(ByVal folderPath As String, ByRef targetSheet As Worksheet, ByRef firstFile As Boolean)
+
+    Dim fso As Object, folder As Object, file As Object, subFolder As Object
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set folder = fso.GetFolder(folderPath)
+
+    'Process all Excel files in folder
+    For Each file In folder.Files
+        If LCase(Right(file.Name, 5)) = ".xlsx" Or LCase(Right(file.Name, 4)) = ".xls" Then
+            MergeSingleFile file.Path, targetSheet, firstFile
+        End If
+    Next file
+
+    'Process subfolders recursively
+    For Each subFolder In folder.SubFolders
+        ScanFolder subFolder.Path, targetSheet, firstFile
+    Next subFolder
+End Sub
+
+
+
+'-------------------------------------------------------
+' Merge 1 workbook into the master sheet
+'-------------------------------------------------------
+Sub MergeSingleFile(ByVal filePath As String, ByRef targetSheet As Worksheet, ByRef firstFile As Boolean)
+
+    Dim wbSource As Workbook
+    Dim wsSource As Worksheet
+    Dim lastRow As Long, srcLastRow As Long, srcLastCol As Long
+    Dim fileName As String
+
+    fileName = Mid(filePath, InStrRev(filePath, "\") + 1)
+
+    Set wbSource = Workbooks.Open(filePath)
+
+    For Each wsSource In wbSource.Sheets
+
+        srcLastRow = wsSource.Cells(wsSource.Rows.Count, "A").End(xlUp).Row
+        srcLastCol = wsSource.Cells(1, wsSource.Columns.Count).End(xlToLeft).Column
+
+        'Write header only once
+        If firstFile Then
+            targetSheet.Cells(1, 1).Value = "Source File"
+            targetSheet.Cells(1, 2).Value = "Source Sheet"
+
+            wsSource.Range(wsSource.Cells(1, 1), wsSource.Cells(1, srcLastCol)).Copy _
+            targetSheet.Cells(1, 3)
+
+            firstFile = False
+        End If
+
+        'Append data
+        lastRow = targetSheet.Cells(targetSheet.Rows.Count, "A").End(xlUp).Row + 1
+
+        'Fill file name
+        targetSheet.Range(targetSheet.Cells(lastRow, 1), _
+                          targetSheet.Cells(lastRow + srcLastRow - 2, 1)).Value = Replace(fileName, ".xlsx", "")
+
+        'Fill sheet name
+        targetSheet.Range(targetSheet.Cells(lastRow, 2), _
+                          targetSheet.Cells(lastRow + srcLastRow - 2, 2)).Value = wsSource.Name
+
+        'Copy without header
+        wsSource.Range(wsSource.Cells(2, 1), wsSource.Cells(srcLastRow, srcLastCol)).Copy _
+            targetSheet.Cells(lastRow, 3)
+
+    Next wsSource
+
+    wbSource.Close False
+
+End Sub
+
+
